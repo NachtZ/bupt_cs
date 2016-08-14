@@ -97,7 +97,6 @@ func (c * Crawler)Get(url string) (content string, err error){
     resp,err := client.Get(url)
     
     if err != nil{
-        fmt.Println("line 86",err)
         return 
     }
     defer resp.Body.Close()
@@ -128,7 +127,7 @@ func (c *Crawler)Run(seed,field string){
     c.field = field
     ctx, err := c.Get(seed)
     if err != nil{
-        fmt.Println("line 117",err)
+        fmt.Println(err)
         return
     }
     c.filter[seed] = true
@@ -146,7 +145,7 @@ func (c *Crawler)Run(seed,field string){
                      
                     html,err1 := c.Get(url)
                     if err1 != nil{
-                        fmt.Println("line 134",err1)
+                        fmt.Println(err1)
                         <-c.routChan
                         return 
                     }
