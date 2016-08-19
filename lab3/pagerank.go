@@ -4,6 +4,7 @@ import (
     "math"
     "os"
     //"io/ioutil"
+    "time"
 )
 type Node struct{
     Right *Node
@@ -15,6 +16,7 @@ type Node struct{
 type Matrix struct{
     colHead *Node
     rowHead *Node
+    colTail *Node
     num []int
     val []float64
     maxNode int
@@ -33,7 +35,7 @@ func NewMatrix(max int) *Matrix{
     m.colHead.Row = -1
     m.rowHead.Col = -1
     m.rowHead.Row = -1
-
+    m.colTail = m.colHead
     return m
 }
 
@@ -58,7 +60,18 @@ func(m *Matrix)Insert(x,y int){
         }
     }
     m.num[y]++
-
+    if m.colTail.Col <= x{
+        if m.colTail.Col == x{
+            if m.colTail.Row < y{
+                node = m.colTail
+            }else{
+                m.colTail = now
+            }
+        }else{
+            node = m.colTail
+            m.colTail = now
+        }
+    }
     for node!=nil && node.Right!=nil{
         if node.Col == x{
             if node.Row >y{
@@ -228,6 +241,7 @@ func (m* Matrix)ReadFile(path string){
 }
 
 func main(){
+    start := time.Now()
     arg_num := len(os.Args)
     m := NewMatrix(1000)
     if arg_num <=2{
@@ -237,8 +251,8 @@ func main(){
     fmt.Println(os.Args)
     m.ReadFile(os.Args[1])
     m.BuildGM()
-    m.check()
+    //m.check()
     res := m.calVector(0.00000001)
     sort(res,os.Args[2])
-    
+    fmt.Println(time.Now().Sub(start))
 }
