@@ -25,7 +25,8 @@ type RF struct{
     nodes []*node
     maxnode int
     size int
-    rings map[string]bool
+    file *os.File
+    count int
 }
 
 func NewRF(size int)(rf *RF){
@@ -33,7 +34,6 @@ func NewRF(size int)(rf *RF){
         nodes:make([]*node,size),
         size:size,
         maxnode:-1,
-        rings:make(map[string]bool),
     }
     return 
 }
@@ -97,10 +97,10 @@ func (rf *RF)dfs(idx int,path string){
         //so we should first find the start of the ring, to cut the fist n nodes until the path's first node is this node.
         //then add the tail of ring in the end of path.
         //after that, we get a ring, we check whether the ring is found before and then insert it to the map.
-        if _,ok := rf.rings[path];ok == true{
-            fmt.Println("in dfs, 1");
-            return ;//can't happend in fact
-        }
+     //   if _,ok := rf.rings[path];ok == true{
+     //       fmt.Println("in dfs, 1");
+     //       return ;//can't happend in fact
+     //   }
         s := "#" + strconv.Itoa(idx) +"#"
         idx := strings.Index(path,s)
         if idx == -1{
@@ -108,7 +108,9 @@ func (rf *RF)dfs(idx int,path string){
         }
         //path = strings.TrimLeft(path,s)
         path = path[idx:] + "#"
-        rf.rings[path] = true
+        rf.count ++
+        fmt.Fprintln(rf.file,rf.count,":",path)
+    //    rf.rings[path] = true
         return
     }
     rf.nodes[idx].state = -1
@@ -159,22 +161,24 @@ func (rf *RF)ReadFile(path string){
 }
 
 func(rf *RF)SearchRing(){
+    file,err := os.Create(os.Args[2])
+    if err !=nil{
+        return 
+    }
+    defer file.Close()
+    rf.file = file
     for i:=0;i<=rf.maxnode;i++{
         if rf.nodes[i]!=nil{
             rf.dfs(i,"#" + strconv.Itoa(i))
             rf.nodes[i].state = 1
         }
     }
-    file,err := os.Create(os.Args[2])
-    if err !=nil{
-        return 
-    }
-    defer file.Close()
+    /*
     count := 0    
     for key,_ := range rf.rings{
         count ++
         fmt.Fprintln(file,count, ":",key)
-    }
+    }*/
 }
 
 func main(){
